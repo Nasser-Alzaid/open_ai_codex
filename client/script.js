@@ -72,31 +72,36 @@ const handleSubmit = async (e) => {
 
   loader(messageDiv);
 
-  // Fetch data from server -> bot's response
-  const response = await fetch('http://localhost:5000', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      prompt: data.get('prompt'),
-    }),
-  });
+  try {
+    const response = await fetch('http://localhost:5001', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        prompt: data.get('prompt'),
+      }),
+    });
 
-  clearInterval(loadInterval);
-  messageDiv.innerHTML = '';
+    clearInterval(loadInterval);
+    messageDiv.innerHTML = '';
 
-  if (response.ok) {
-    const responseData = await response.json();
-    const parsedData = responseData.bot.trim();
+    if (response.ok) {
+      const responseData = await response.json();
+      const parsedData = responseData.bot.trim();
 
-    typeText(messageDiv, parsedData);
-  } else {
-    const err = await response.text();
-
+      typeText(messageDiv, parsedData);
+    } else {
+      const err = await response.text();
+      messageDiv.innerHTML = 'Something went wrong';
+      console.error('Server Error:', err);
+      alert(err); 
+    }
+  } catch (error) {
+    clearInterval(loadInterval);
     messageDiv.innerHTML = 'Something went wrong';
-
-    alert(err);
+    console.error('Fetch Error:', error);
+    alert('Failed to fetch: ' + error.message);
   }
 };
 
